@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Aplicativo web académico para el análisis histórico y predicción binaria del índice UV en Barranquilla."
+    >
+
+    <title>
+        Proyecto UV | Barranquilla
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/styles.css') }}"
+    >
+
+    <script
+        src="{{ url_for('static', filename='js/main.js') }}"
+        defer
+    ></script>
+
+</head>
+
+
+<body>
+
+
+<a
+    class="saltar-contenido"
+    href="#contenido"
+>
+    Saltar al contenido
+</a>
+
+
+<!-- =========================================================
+     CABECERA
+     ========================================================= -->
+
+<header class="cabecera">
+
+    <div class="contenedor cabecera-interior">
+
+        <a
+            class="identidad"
+            href="{{ url_for('inicio') }}"
+        >
+
+            <span
+                class="identidad-sigla"
+                aria-hidden="true"
+            >
+                UV
+            </span>
+
+            <span class="identidad-texto">
+
+                <span class="identidad-nombre">
+                    Barranquilla, Colombia
+                </span>
+
+                <span class="identidad-descripcion">
+                    Análisis ambiental y predicción UV
+                </span>
+
+            </span>
+
+        </a>
+
+
+        <nav
+            class="navegacion"
+            aria-label="Navegación principal"
+        >
+
+            <a href="#resumen">
+                Resumen
+            </a>
+
+            <a href="#historico">
+                Análisis histórico
+            </a>
+
+            <a href="#prediccion">
+                Predicción
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     PRINCIPAL
+     ========================================================= -->
+
+<main
+    id="contenido"
+    class="contenedor"
+>
+
+
+    <!-- =====================================================
+         PRESENTACIÓN
+         ===================================================== -->
+
+    <section class="presentacion">
+
+        <p class="etiqueta">
+            Proyecto de grado · Ingeniería de Sistemas
+        </p>
+
+        <h1>
+            Desarrollo de un aplicativo web para la
+            predicción binaria del índice UV en Barranquilla
+        </h1>
+
+        <p class="introduccion">
+
+            Aplicativo web orientado al análisis histórico
+            del índice de radiación ultravioleta y de
+            variables ambientales asociadas, así como a
+            la clasificación predictiva de condiciones UV
+            mediante técnicas de aprendizaje automático.
+
+        </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESUMEN
+         ===================================================== -->
+
+    <section
+        id="resumen"
+        class="resumen"
+        aria-labelledby="titulo-resumen"
+    >
+
+        <div class="encabezado-resumen">
+
+            <div>
+
+                <h2 id="titulo-resumen">
+                    Datos históricos de Barranquilla
+                </h2>
+
+                <p>
+                    Resumen general de las variables
+                    ambientales y del índice UV.
+                </p>
+
+            </div>
+
+            <span class="fuente">
+                NASA POWER · NASA Giovanni
+            </span>
+
+        </div>
+
+
+        <!-- COBERTURA -->
+
+        <dl class="cobertura">
+
+            <div>
+
+                <dt>
+                    Registros ambientales
+                </dt>
+
+                <dd>
+
+                    {{
+                        "{:,}".format(registros)
+                        .replace(",", ".")
+                    }}
+
+                    <span class="unidad">
+                        registros
+                    </span>
+
+                </dd>
+
+            </div>
+
+
+            <div>
+
+                <dt>
+                    Periodo ambiental
+                </dt>
+
+                <dd>
+
+                    {{ anio_inicio }}
+
+                    <span class="separador-periodo">
+                        –
+                    </span>
+
+                    {{ anio_fin }}
+
+                </dd>
+
+            </div>
+
+        </dl>
+
+
+        <!-- INDICADORES -->
+
+        <dl class="indicadores">
+
+            <div>
+
+                <dt>
+                    Temperatura promedio
+                </dt>
+
+                <dd>
+
+                    {{
+                        "%.2f"
+                        |format(
+                            temperatura_promedio
+                        )
+                        |replace(".", ",")
+                    }}
+
+                    <span class="unidad">
+                        °C
+                    </span>
+
+                    <span class="detalle-indicador">
+                        Temperatura del aire a 2 m
+                    </span>
+
+                </dd>
+
+            </div>
+
+
+            <div>
+
+                <dt>
+                    Humedad promedio
+                </dt>
+
+                <dd>
+
+                    {{
+                        "%.2f"
+                        |format(
+                            humedad_promedio
+                        )
+                        |replace(".", ",")
+                    }}
+
+                    <span class="unidad">
+                        %
+                    </span>
+
+                    <span class="detalle-indicador">
+                        Humedad relativa a 2 m
+                    </span>
+
+                </dd>
+
+            </div>
+
+
+            <div>
+
+                <dt>
+                    UV promedio anual
+                </dt>
+
+                <dd>
+
+                    {{
+                        "%.2f"
+                        |format(
+                            uv_promedio
+                        )
+                        |replace(".", ",")
+                    }}
+
+                    <span class="detalle-indicador">
+                        {{ uv_anio_inicio }}
+                        –
+                        {{ uv_anio_fin }}
+                    </span>
+
+                </dd>
+
+            </div>
+
+        </dl>
+
+
+        <!-- UV -->
+
+        <dl class="cobertura">
+
+            <div>
+
+                <dt>
+                    Menor promedio UV anual
+                </dt>
+
+                <dd>
+
+                    {{
+                        "%.2f"
+                        |format(
+                            uv_minimo
+                        )
+                        |replace(".", ",")
+                    }}
+
+                </dd>
+
+            </div>
+
+
+            <div>
+
+                <dt>
+                    Mayor promedio UV anual
+                </dt>
+
+                <dd>
+
+                    {{
+                        "%.2f"
+                        |format(
+                            uv_maximo
+                        )
+                        |replace(".", ",")
+                    }}
+
+                </dd>
+
+            </div>
+
+        </dl>
+
+
+        <div class="notas-datos">
+
+            <p>
+
+                <strong>
+                    Cobertura geográfica:
+                </strong>
+
+                los datos utilizados corresponden al
+                área de estudio de Barranquilla,
+                Colombia.
+
+            </p>
+
+
+            <p>
+
+                <strong>
+                    Fuentes:
+                </strong>
+
+                las variables ambientales provienen de
+                NASA POWER y los registros de índice UV
+                utilizados en el proyecto fueron obtenidos
+                mediante NASA Giovanni.
+
+            </p>
+
+
+            <p>
+
+                Los valores faltantes identificados con
+                <code>-999</code> son excluidos de los
+                cálculos ambientales.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MÓDULOS
+         ===================================================== -->
+
+    <div class="modulos">
+
+
+        <!-- =================================================
+             HISTÓRICO
+             ================================================= -->
+
+        <section
+            id="historico"
+            class="modulo"
+        >
+
+            <p class="etiqueta">
+                Exploración de datos
+            </p>
+
+            <h2>
+                Análisis histórico
+            </h2>
+
+            <p>
+
+                Consulta la evolución anual del índice UV
+                y de las principales variables ambientales
+                disponibles para Barranquilla.
+
+            </p>
+
+
+            <div class="grafica-panel">
+
+                <div class="grafica-encabezado">
+
+                    <div>
+
+                        <h3 id="titulo-serie">
+                            Índice UV promedio anual
+                        </h3>
+
+                        <p>
+                            Barranquilla, Colombia
+                        </p>
+
+                    </div>
+
+
+                    <div class="grafica-control">
+
+                        <label for="variable-historica">
+                            Variable
+                        </label>
+
+                        <select
+                            id="variable-historica"
+                            disabled
+                        >
+
+                            <option
+                                value="UV_INDEX"
+                                selected
+                            >
+                                Índice UV
+                            </option>
+
+                            <option value="T2M">
+                                Temperatura
+                            </option>
+
+                            <option value="RH2M">
+                                Humedad
+                            </option>
+
+                            <option value="ALLSKY_SFC_SW_DWN">
+                                Radiación solar
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    id="estado-grafica"
+                    class="grafica-mensaje"
+                    role="status"
+                >
+                    Preparando gráfica…
+                </p>
+
+
+                <div
+                    id="contenedor-grafica"
+                    class="grafica-contenedor"
+                    hidden
+                >
+
+                    <svg
+                        id="grafica-historica"
+                        role="img"
+                        tabindex="0"
+                        aria-labelledby="titulo-serie"
+                    ></svg>
+
+                </div>
+
+
+                <p
+                    id="detalle-punto"
+                    class="grafica-detalle"
+                    aria-live="polite"
+                ></p>
+
+
+                <p
+                    id="nota-serie"
+                    class="grafica-nota"
+                ></p>
+
+
+                <p class="grafica-ayuda">
+
+                    Pasa el cursor sobre la gráfica o
+                    utiliza las flechas del teclado para
+                    consultar los valores de cada año.
+
+                </p>
+
+            </div>
+
+
+            <script
+                id="datos-historicos"
+                type="application/json"
+            >{{ datos_historicos|tojson }}</script>
+
+        </section>
+
+
+        <!-- =================================================
+             PREDICCIÓN
+             ================================================= -->
+
+        <section
+            id="prediccion"
+            class="modulo"
+        >
+
+            <p class="etiqueta">
+                Machine Learning
+            </p>
+
+            <h2>
+                Predicción binaria del índice UV
+            </h2>
+
+            <p>
+
+                El modelo predictivo utiliza el índice de
+                claridad atmosférica
+                <code>ALLSKY_KT</code> para clasificar
+                las condiciones de exposición UV como
+                <strong>BAJO</strong> o
+                <strong>ALTO</strong>.
+
+            </p>
+
+
+            <div class="prediccion-panel">
+
+
+                <form
+                    method="post"
+                    action="{{ url_for('inicio') }}#prediccion"
+                    class="formulario-prediccion"
+                >
+
+                    <label for="allsky_kt">
+                        Índice de claridad atmosférica
+                    </label>
+
+
+                    <span class="campo-descripcion">
+
+                        Variable NASA POWER:
+                        <code>ALLSKY_KT</code>
+
+                    </span>
+
+
+                    <input
+                        type="number"
+                        id="allsky_kt"
+                        name="allsky_kt"
+                        step="0.01"
+                        min="{{ '%.2f'|format(kt_minimo) }}"
+                        max="{{ '%.2f'|format(kt_maximo) }}"
+                        value="{% if valor_ingresado is not none %}{{ valor_ingresado }}{% endif %}"
+                        placeholder="Ejemplo: 0.55"
+                        required
+                    >
+
+
+                    <span class="campo-ayuda">
+
+                        Rango histórico observado:
+
+                        {{
+                            "%.2f"
+                            |format(kt_minimo)
+                        }}
+
+                        –
+
+                        {{
+                            "%.2f"
+                            |format(kt_maximo)
+                        }}
+
+                    </span>
+
+
+                    <button type="submit">
+                        Analizar riesgo UV
+                    </button>
+
+                </form>
+
+
+                <!-- RESULTADO -->
+
+                {% if error_prediccion %}
+
+                    <div
+                        class="resultado-error"
+                        role="alert"
+                    >
+
+                        <span class="resultado-etiqueta">
+                            Error
+                        </span>
+
+                        <strong>
+                            No fue posible realizar la predicción.
+                        </strong>
+
+                        <p>
+                            {{ error_prediccion }}
+                        </p>
+
+                    </div>
+
+
+                {% elif resultado_prediccion %}
+
+                    <div
+                        class="
+                            resultado-prediccion
+
+                            {% if resultado_prediccion.clase == 'ALTO' %}
+                                resultado-alto
+                            {% else %}
+                                resultado-bajo
+                            {% endif %}
+                        "
+                    >
+
+                        <span class="resultado-etiqueta">
+                            Clasificación obtenida
+                        </span>
+
+
+                        <strong class="resultado-clase">
+
+                            {{
+                                resultado_prediccion.clase
+                            }}
+
+                        </strong>
+
+
+                        <div class="resultado-datos">
+
+                            <p>
+
+                                Score para clase ALTO:
+
+                                <strong>
+
+                                    {{
+                                        "%.2f"
+                                        |format(
+                                            resultado_prediccion.score
+                                            * 100
+                                        )
+                                        |replace(".", ",")
+                                    }}
+
+                                    %
+
+                                </strong>
+
+                            </p>
+
+
+                            <p>
+
+                                ALLSKY_KT:
+
+                                <strong>
+
+                                    {{
+                                        "%.3f"
+                                        |format(
+                                            resultado_prediccion.valor_kt
+                                        )
+                                    }}
+
+                                </strong>
+
+                            </p>
+
+
+                            <p>
+
+                                Umbral del modelo:
+
+                                <strong>
+
+                                    {{
+                                        "%.2f"
+                                        |format(
+                                            resultado_prediccion.umbral
+                                        )
+                                    }}
+
+                                </strong>
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                {% else %}
+
+                    <div class="resultado-espera">
+
+                        <span class="resultado-etiqueta">
+                            Resultado
+                        </span>
+
+                        <p>
+
+                            Ingresa un valor válido de
+                            <code>ALLSKY_KT</code> para
+                            ejecutar el modelo.
+
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="notas-prediccion">
+
+                <p>
+
+                    <strong>
+                        Clasificación:
+                    </strong>
+
+                    BAJO corresponde a UVI &lt; 6 y
+                    ALTO a UVI ≥ 6.
+
+                </p>
+
+
+                <p>
+
+                    <strong>
+                        Modelo:
+                    </strong>
+
+                    regresión logística con balanceo de
+                    clases.
+
+                </p>
+
+
+                <p>
+
+                    <strong>
+                        Umbral del clasificador:
+                    </strong>
+
+                    {{ "%.2f"|format(umbral_modelo) }}.
+
+                </p>
+
+
+                <p>
+
+                    Este prototipo tiene fines académicos
+                    y no sustituye las alertas oficiales
+                    de exposición ultravioleta.
+
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<footer class="pie">
+
+    <div class="contenedor pie-interior">
+
+        <p>
+            Proyecto de grado · Ingeniería de Sistemas
+        </p>
+
+        <p>
+            Barranquilla, Colombia
+        </p>
+
+    </div>
+
+</footer>
+
+
+</body>
+
+</html>
