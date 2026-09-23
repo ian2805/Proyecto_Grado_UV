@@ -1131,3 +1131,63 @@
     }
 
 })();
+
+
+(() => {
+    "use strict";
+
+    const contenedor = document.getElementById("mapa-zonas");
+    const fuente = document.getElementById("datos-mapa");
+
+    if (!contenedor || !fuente || !window.L) {
+        return;
+    }
+
+    let puntos;
+
+    try {
+        puntos = JSON.parse(fuente.textContent);
+    } catch {
+        return;
+    }
+
+    const mapa = L.map(contenedor).setView([10.98, -74.8], 12);
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 18,
+            attribution: "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(mapa);
+
+    const limites = [];
+
+    puntos.forEach(punto => {
+        const marcador = L.marker([punto.latitud, punto.longitud])
+            .addTo(mapa);
+
+        marcador.bindPopup(
+            `<strong>${punto.zona}</strong><br>` +
+            `Radiación promedio: ${punto.radiacion.toFixed(2)} kWh/m²/día`
+        );
+
+        limites.push([punto.latitud, punto.longitud]);
+    });
+
+    if (limites.length > 1) {
+        mapa.fitBounds(limites, { padding: [24, 24] });
+    }
+
+    function ajustarMapa() {
+        mapa.invalidateSize(true);
+
+        if (limites.length > 1) {
+            mapa.fitBounds(limites, { padding: [24, 24] });
+        }
+    }
+
+    window.addEventListener("load", ajustarMapa);
+    window.setTimeout(ajustarMapa, 300);
+    window.setTimeout(ajustarMapa, 1000);
+})();

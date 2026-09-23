@@ -24,6 +24,18 @@
         href="{{ url_for('static', filename='css/styles.css') }}"
     >
 
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+        defer
+    ></script>
+
     <script
         src="{{ url_for('static', filename='js/main.js') }}"
         defer
@@ -160,7 +172,8 @@
 
                 <p>
                     Resumen general de las variables
-                    ambientales y del índice UV.
+                    ambientales y del índice UV para la zona
+                    <strong>{{ zona_activa }}</strong>.
                 </p>
 
             </div>
@@ -409,6 +422,39 @@
     <div class="modulos">
 
 
+        <section
+            id="mapa"
+            class="modulo"
+        >
+
+            <p class="etiqueta">
+                Distribución geográfica
+            </p>
+
+            <h2>
+                Zonas de estudio
+            </h2>
+
+            <p>
+                Ubicación de los puntos de referencia y su
+                radiación solar promedio diaria.
+            </p>
+
+            <div
+                id="mapa-zonas"
+                class="mapa-contenedor"
+                role="img"
+                aria-label="Mapa de las zonas de estudio de Barranquilla"
+            ></div>
+
+            <script
+                id="datos-mapa"
+                type="application/json"
+            >{{ datos_mapa|tojson }}</script>
+
+        </section>
+
+
         <!-- =================================================
              HISTÓRICO
              ================================================= -->
@@ -453,6 +499,36 @@
 
 
                     <div class="grafica-control">
+
+                        <form
+                            method="get"
+                            action="{{ url_for('inicio') }}#historico"
+                        >
+
+                            <label for="zona">
+                                Zona
+                            </label>
+
+                            <select
+                                id="zona"
+                                name="zona"
+                                onchange="this.form.submit()"
+                            >
+
+                                {% for zona in zonas %}
+
+                                    <option
+                                        value="{{ zona }}"
+                                        {% if zona == zona_activa %}selected{% endif %}
+                                    >
+                                        {{ zona }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </form>
 
                         <label for="variable-historica">
                             Variable
@@ -546,6 +622,107 @@
         </section>
 
 
+        <section
+            id="proyecciones"
+            class="modulo"
+        >
+
+            <p class="etiqueta">
+                Escenario futuro
+            </p>
+
+            <h2>
+                Proyección anual de radiación
+            </h2>
+
+            <p>
+                Elige cualquier año posterior a {{ anio_fin }} para estimar
+                la radiación promedio diaria de <strong>{{ zona_activa }}</strong>.
+            </p>
+
+            <div class="proyeccion-panel">
+
+                <form
+                    method="post"
+                    action="{{ url_for('inicio') }}#proyecciones"
+                    class="formulario-proyeccion"
+                >
+
+                    <input type="hidden" name="accion" value="proyeccion">
+                    <input type="hidden" name="zona" value="{{ zona_activa }}">
+
+                    <label for="anio_objetivo">
+                        Año objetivo
+                    </label>
+
+                    <input
+                        type="number"
+                        id="anio_objetivo"
+                        name="anio_objetivo"
+                        min="{{ anio_fin + 1 }}"
+                        max="2100"
+                        placeholder="Ejemplo: 2035"
+                        required
+                    >
+
+                    <button type="submit">
+                        Calcular proyección
+                    </button>
+
+                </form>
+
+                {% if error_proyeccion %}
+
+                    <div class="resultado-error" role="alert">
+                        {{ error_proyeccion }}
+                    </div>
+
+                {% elif resultado_proyeccion %}
+
+                    <div class="resultado-prediccion resultado-radiacion">
+
+                        <span class="resultado-etiqueta">
+                            Escenario estimado para {{ resultado_proyeccion.YEAR }}
+                        </span>
+
+                        <strong class="resultado-clase">
+                            {{ "%.2f"|format(resultado_proyeccion.RADIACION)|replace(".", ",") }}
+                            kWh/m²/día
+                        </strong>
+
+                        <p>
+                            Intervalo orientativo:
+                            <strong>
+                                {{ "%.2f"|format(resultado_proyeccion.MINIMO)|replace(".", ",") }}
+                                –
+                                {{ "%.2f"|format(resultado_proyeccion.MAXIMO)|replace(".", ",") }}
+                                kWh/m²/día
+                            </strong>
+                        </p>
+
+                        <p>
+                            Error medio retrospectivo:
+                            <strong>
+                                {{ "%.2f"|format(resultado_proyeccion.ERROR_VALIDACION)|replace(".", ",") }}
+                                kWh/m²/día
+                            </strong>
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+                <p class="proyeccion-nota">
+                    Pronóstico anual basado en la secuencia histórica observada,
+                    con validación retrospectiva de los últimos cuatro años.
+                    Es un escenario estadístico, no una certeza meteorológica.
+                </p>
+
+            </div>
+
+        </section>
+
+
         <!-- =================================================
              PREDICCIÓN
              ================================================= -->
@@ -577,6 +754,91 @@
 
             <div class="prediccion-panel">
 
+                <div class="prediccion-solar">
+
+                    <h3>
+                        Predicción de radiación solar
+                    </h3>
+
+                    <p class="campo-descripcion">
+                        Modelo de regresión entrenado con datos
+                        diarios de NASA POWER para las nueve zonas.
+                    </p>
+
+                    <form
+                        method="post"
+                        action="{{ url_for('inicio') }}#prediccion"
+                        class="formulario-radiacion"
+                    >
+
+                        <input type="hidden" name="accion" value="radiacion">
+                        <input type="hidden" name="zona" value="{{ zona_activa }}">
+
+                        {% for campo, etiqueta in [
+                            ('T2M', 'Temperatura'),
+                            ('T2M_MAX', 'Temperatura máxima'),
+                            ('T2M_MIN', 'Temperatura mínima'),
+                            ('RH2M', 'Humedad relativa'),
+                            ('ALLSKY_KT_RADIACION', 'Índice de claridad'),
+                            ('WS10M', 'Viento'),
+                            ('WD10M', 'Dirección del viento'),
+                            ('PRECTOTCORR', 'Precipitación')
+                        ] %}
+
+                            <label for="{{ campo }}">
+                                {{ etiqueta }}
+                            </label>
+
+                            <input
+                                type="number"
+                                id="{{ campo }}"
+                                name="{{ campo }}"
+                                step="0.01"
+                                {% if campo == 'ALLSKY_KT_RADIACION' %}
+                                min="{{ '%.2f'|format(kt_minimo) }}"
+                                max="{{ '%.2f'|format(kt_maximo) }}"
+                                {% endif %}
+                                value="{{ valores_referencia['ALLSKY_KT'] if campo == 'ALLSKY_KT_RADIACION' else valores_referencia[campo] }}"
+                                required
+                            >
+
+                        {% endfor %}
+
+                        <button type="submit">
+                            Estimar radiación
+                        </button>
+
+                    </form>
+
+                    {% if error_radiacion %}
+
+                        <div class="resultado-error" role="alert">
+                            {{ error_radiacion }}
+                        </div>
+
+                    {% elif resultado_radiacion is not none %}
+
+                        <div class="resultado-prediccion resultado-radiacion">
+                            <span class="resultado-etiqueta">
+                                Estimación para {{ zona_activa }}
+                            </span>
+                            <strong class="resultado-clase">
+                                {{ "%.2f"|format(resultado_radiacion.valor)|replace(".", ",") }}
+                                kWh/m²/día
+                            </strong>
+                            <p>
+                                Promedio histórico de la zona:
+                                <strong>
+                                    {{ "%.2f"|format(resultado_radiacion.promedio)|replace(".", ",") }}
+                                    kWh/m²/día
+                                </strong>
+                            </p>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
 
                 <form
                     method="post"
@@ -607,6 +869,12 @@
                         value="{% if valor_ingresado is not none %}{{ valor_ingresado }}{% endif %}"
                         placeholder="Ejemplo: 0.55"
                         required
+                    >
+
+                    <input
+                        type="hidden"
+                        name="zona"
+                        value="{{ zona_activa }}"
                     >
 
 
